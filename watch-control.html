@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小天才手表控制（手机版）</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        input { width: 100%; padding: 8px; margin: 5px 0; }
+        button { background: #007bff; color: white; padding: 10px; border: none; width: 100%; }
+    </style>
+</head>
+<body>
+    <h2>小天才手表控制</h2>
+    <div id="message" style="color: red; margin-bottom: 10px;"></div>
+    
+    <input type="text" id="inputKey" placeholder="请输入手表Key">
+    <input type="text" id="inputChipId" placeholder="请输入Chip ID">
+    <input type="text" id="inputBindingNumber" placeholder="请输入绑定号">
+    
+    <button onclick="sendCommand('locate')">定位手表</button>
+    <button onclick="sendCommand('sos')">发送SOS</button>
+    <button onclick="sendCommand('voice')">语音监听</button>
+
+    <script>
+        // 假设小天才的API端点和参数格式如下（需替换为真实API）
+        const API_ENDPOINT = "https://api.xiaotiancai.com/control";
+        
+        async function sendCommand(action) {
+            const key = document.getElementById('inputKey').value;
+            const chipId = document.getElementById('inputChipId').value;
+            const bindingNumber = document.getElementById('inputBindingNumber').value;
+
+            if (!key || !chipId || !bindingNumber) {
+                showMessage("请填写所有字段！");
+                return;
+            }
+
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        key,
+                        chipId,
+                        bindingNumber,
+                        action
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showMessage("操作成功: " + result.data);
+                } else {
+                    showMessage("失败: " + result.error);
+                }
+            } catch (error) {
+                showMessage("网络错误，请重试");
+            }
+        }
+
+        function showMessage(text) {
+            document.getElementById('message').innerText = text;
+        }
+    </script>
+</body>
+</html>
