@@ -7,7 +7,7 @@
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; }
         input { width: 100%; padding: 8px; margin: 5px 0; }
-        button { background: #007bff; color: white; padding: 10px; border: none; width: 100%; }
+        button { background: #007bff; color: white; padding: 10px; border: none; width: 100%; margin: 5px 0; }
     </style>
 </head>
 <body>
@@ -21,11 +21,13 @@
     <button onclick="sendCommand('locate')">定位手表</button>
     <button onclick="sendCommand('sos')">发送SOS</button>
     <button onclick="sendCommand('voice')">语音监听</button>
+    <button onclick="sendFriendCircle()">发送好友圈</button>
 
     <script>
-        // 假设小天才的API端点和参数格式如下（需替换为真实API）
-        const API_ENDPOINT = "https://api.xiaotiancai.com/control";
-        
+        // 使用CORS代理（临时解决方案）
+        const CORS_PROXY = "https://cors-anywhere.herokuapp.com/";
+        const API_ENDPOINT = "https://api.xiaotiancai.com/control"; // 替换为真实API地址
+
         async function sendCommand(action) {
             const key = document.getElementById('inputKey').value;
             const chipId = document.getElementById('inputChipId').value;
@@ -37,7 +39,7 @@
             }
 
             try {
-                const response = await fetch(API_ENDPOINT, {
+                const response = await fetch(CORS_PROXY + API_ENDPOINT, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -50,12 +52,48 @@
 
                 const result = await response.json();
                 if (result.success) {
-                    showMessage("操作成功: " + result.data);
+                    showMessage("操作成功: " + JSON.stringify(result.data));
                 } else {
                     showMessage("失败: " + result.error);
                 }
             } catch (error) {
                 showMessage("网络错误，请重试");
+                console.error(error);
+            }
+        }
+
+        async function sendFriendCircle() {
+            const key = document.getElementById('inputKey').value;
+            const chipId = document.getElementById('inputChipId').value;
+            const bindingNumber = document.getElementById('inputBindingNumber').value;
+
+            if (!key || !chipId || !bindingNumber) {
+                showMessage("请填写所有字段！");
+                return;
+            }
+
+            try {
+                const response = await fetch(CORS_PROXY + API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        key,
+                        chipId,
+                        bindingNumber,
+                        action: "send_friend_circle",
+                        message: "这是来自好友圈的消息！" // 自定义消息内容
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showMessage("好友圈发送成功: " + JSON.stringify(result.data));
+                } else {
+                    showMessage("失败: " + result.error);
+                }
+            } catch (error) {
+                showMessage("网络错误，请重试");
+                console.error(error);
             }
         }
 
